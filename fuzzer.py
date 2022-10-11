@@ -17,7 +17,7 @@ class Fuzzer:
 
     def generate_one(self):
         document = Document(Random.range(TreeConfig.min_element_count, TreeConfig.max_element_count))
-        document.generate_nodes()
+        document.generate_nodes() # the depth of the dom tree is no more than 2.
         document.generate_attributes()
         document.generate_css_rules()
         document.generate_js_functions()

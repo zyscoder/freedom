@@ -1004,6 +1004,7 @@ SVG_CHILD_ELEMENTS = {
         + SVG_DESCRIPTIVE_ELEMENTS,
 }
 
+# zys: the attributes are not divided with their correlations
 SVG_ANIMATABLE_ATTRIBUTES = [
     "alignment-baseline",
     "amplitude",

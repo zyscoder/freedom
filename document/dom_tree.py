@@ -19,12 +19,13 @@ merge_blacklist = [
 class DOMTree:
     def __init__(self, max_element_count):
         self.root_svg = None
-        self.root_elements = []
+        self.root_elements = [] # zys: the dom tree structure is too flated
         self.element_count = 0
         self.max_element_count = max_element_count
 
     @property
     def elements(self):
+        # zys: self.elements only return the root elements?
         return list(itertools.chain(*self.root_elements))
 
     @property
@@ -33,6 +34,7 @@ class DOMTree:
 
     def add_root_element(self, element):
         index = Random.selector(len(self.root_elements) + 1)
+        # zys: dom tree strcuture
         self.root_elements.insert(index, element)
         element.tree_depth = 0
 
@@ -44,6 +46,7 @@ class DOMTree:
 
     def init_element(self, context, element):
         context.add_object(element)
+        # zys: correlations between html elements and css properties
         element.generate_mandatory_attributes(context)
         self.element_count += 1
 
@@ -57,6 +60,7 @@ class DOMTree:
 
     def generate_svg_elements(self, context, count):
         self.add_root_svg_element(context)
+        # zys: svg element only insert child for only one depth.
         for _ in range(count):
             child = self.root_svg.insert_child()
             if child is not None:
@@ -79,6 +83,7 @@ class DOMTree:
 
     def generate_attributes(self, context):
         for element in self.elements:
+            # zys: only root elements? It seems that no any attributes are generated here.
             element.generate_attributes(context)
 
     ################################################
@@ -89,10 +94,19 @@ class DOMTree:
         if self.full:
             return None
 
+        # zys: parents here are all root elements, thus the depth of the dom structure is no more than 2.
         parents = [e for e in self.elements if e.tree_depth < TreeConfig.max_depth]
         trial = 0
         while trial < len(parents):
             parent = Random.choice(parents)
+            ###################################################
+            # zys: generate a deeper dom tree
+            ###################################################
+            while parent.children_count > 0:
+                if Random.range(0, TreeConfig.max_depth) == 0: break
+                parents = parent.children
+                parent = Random.choice(parents)
+            ###################################################
             child = parent.insert_child()
             if child is not None:
                 self.init_element(context, child)

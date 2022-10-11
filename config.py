@@ -13,7 +13,7 @@ class TreeConfig:
     max_element_count = 80
     min_element_count = 40
     avg_element_count = 60
-    max_depth = 3
+    max_depth = 16
 
 
 class JSConfig:
