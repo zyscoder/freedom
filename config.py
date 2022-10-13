@@ -9,11 +9,12 @@ class TreeConfig:
         "aria": 1
     }
     max_attribute_count = 10
-    root_element_count = 10
-    max_element_count = 80
-    min_element_count = 40
+    root_element_count = 3
+    max_element_count = 3 ** 6
+    min_element_count = 3 ** 3
     avg_element_count = 60
-    max_depth = 16
+    max_depth = 256
+    max_width = 3
 
 
 class JSConfig:

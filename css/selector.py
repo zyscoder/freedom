@@ -56,13 +56,17 @@ class CSSAtRuleSelector(CSSSelector):
 class CSSElementSelector(CSSSelector):
     def __init__(self, scope=None):
         super().__init__()
-        self.scope = scope
+        self.scope = scope # zys: we can limit the scope of the selector to a set of subtree elements.
         self.value = None
 
     def generate(self, context):
         scope = None
         if self.scope is not None:
-            scope = context.in_tree_set.intersection(set(self.scope))
+            # scope = context.in_tree_set.intersection(set(self.scope))
+            scope = []
+            for o in context.rdfuzz_subbox:
+                if o.name not in scope: 
+                    scope.append(o.name)
         if scope is None or len(scope) == 0:
             scope = context.in_tree_set
         elem = Random.choice(list(scope))
@@ -98,10 +102,11 @@ class CSSIDSelector(CSSSelector):
         self.elem = None
 
     def generate(self, context):
-        scope = self.scope
-        if self.scope is None:
-            scope = docs.elements
-        self.elem = context.get_object(scope)
+        # scope = self.scope
+        # if self.scope is None:
+        #     scope = docs.elements
+        # self.elem = context.get_object(scope)
+        self.elem = Random.choice(context.rdfuzz_subbox)
 
     def merge_fix(self, merge_map):
         if self.elem is not None and self.elem in merge_map:

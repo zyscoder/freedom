@@ -65,9 +65,39 @@ class DOMContext(Context):
         self.in_tree_set = set()
         self.token_limit = token_limit
 
+        self.rdfuzz_superset = set()
+        self.rdfuzz_subtree = []
+
     @property
     def in_tree_elements(self):
         return [o for o in itertools.chain.from_iterable(self.object_pool.objects()) if o.is_element]
+
+    @property
+    def rdfuzz_subbox(self):
+        if len(self.rdfuzz_subtree) == 0:
+            def get_descendants(element):
+                descendants = []
+                children = element.children
+                descendants.extend(descendants)
+                for child in children:
+                    descendants.extend(get_descendants(child))
+                return descendants
+            
+            subbox_core_element = Random.choice(self.in_tree_elements)
+            self.rdfuzz_subtree.extend(get_descendants(subbox_core_element))
+            parent = subbox_core_element
+            while parent:
+                self.rdfuzz_subtree.append(parent)
+                parent = parent.parent
+            
+            # update rdfuzz superset
+            for o in self.rdfuzz_subtree:
+                ancestors = get_object_ancestors(o.name)
+                for ancestor in ancestors:
+                    if ancestor not in self.rdfuzz_superset:
+                        self.rdfuzz_superset.add(ancestor)
+
+        return self.rdfuzz_subtree
 
     # Token
     def get_token(self, token):
@@ -90,12 +120,23 @@ class DOMContext(Context):
             self.in_tree_set.add(o.name)
 
     def get_objects(self, names):
-        ret = []
+        ret = self.get_rdfuzz_objects(names)
+        if len(ret) > 0: return ret
+        
         for name in names:
             objs = self.object_pool.get(name)
             if objs is not None:
                 ret.extend(objs)
         return ret
+    
+    def get_rdfuzz_objects(self, names):
+        ret = []
+        for obj in self.rdfuzz_subbox:
+            if obj.name in names:
+                ret.append(obj)
+        print(ret)
+        return ret
+
 
 
 class JSContext(Context):
@@ -108,9 +149,10 @@ class JSContext(Context):
 
     @property
     def superset_at_line(self):
-        return self.global_context.superset | {name for name, line in self.superset.items() if line < self.line}
+        # return self.global_context.superset | {name for name, line in self.superset.items() if line < self.line}
+        return self.global_context.rdfuzz_superset | {name for name, line in self.superset.items() if line < self.line}
 
-    def add_object(self, o):
+    def add_object(self, o): 
         super().add_object(o)
 
         # update superset
@@ -139,7 +181,13 @@ class JSContext(Context):
         objs = self.get_offsprings(name)
         return Random.choice(objs)
 
+    # we only need the objects on the rdfuzz_subbox
+    def rdfuzz_contains(self, name):
+        return (name in self.global_context.rdfuzz_superset) or \
+               (name in self.superset and self.superset[name] < self.line)
+
     def contains(self, name):
+        return self.rdfuzz_contains(name)
         return (name in self.global_context.superset) or \
                (name in self.superset and self.superset[name] < self.line)
 

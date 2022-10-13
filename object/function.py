@@ -39,11 +39,27 @@ class Function(Object):
         # 1. select an alive object (type)
         obj_names = list(self.context.superset_at_line)
         weights = [get_api_count(name) for name in obj_names]
+        # print(obj_names, weights)
 
         # 2. select an api that uses the object name as |this|
         while True:
             name = Random.choices(obj_names, weights)[0]
             template = Random.choice(js_apis[name])
+            if template.satiable(self.context):
+                api = template.instantiate()
+                # print(api)
+                api.generate(self.context)
+                return api
+
+    def generate_rdfuzz_api(self):
+        # 1. select an alive object
+        objs = self.context.global_context.rdfuzz_subbox
+        # print(obj_names, weights)
+
+        # 2. select an api that uses the object name as |this|
+        while True:
+            obj = Random.choice(objs)
+            template = Random.choice(js_apis[obj.name])
             if template.satiable(self.context):
                 api = template.instantiate()
                 api.generate(self.context)
@@ -77,7 +93,8 @@ class Function(Object):
         line = Random.selector(self.api_count + 1)
         self.context.shift_object_location(line)
         self.context.line = line
-        api = self.generate_api()
+        # api = self.generate_api()
+        api = self.generate_rdfuzz_api()
         self.apis.insert(line, api)
         return True
 
@@ -91,7 +108,8 @@ class Function(Object):
             self.context.line = line
             old_api = self.apis[line]
             if old_api.ret is None:
-                new_api = self.generate_api()
+                new_api = self.generate_rdfuzz_api()
+                # new_api = self.generate_api()
                 self.apis[line] = new_api
                 return True
             trial += 1

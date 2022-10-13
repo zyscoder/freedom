@@ -28,5 +28,6 @@ class Manager:
             path = os.path.join(self.output_dir, "{}.html".format(self.fn()))
             with open(path, "w") as f:
                 f.write(str(document))
+            print("One testcase have been written to '{}'".format(path))
         else:
             pass

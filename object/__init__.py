@@ -95,8 +95,6 @@ class Element(Object):
     ################################################
     def generate_attributes(self, context):
         avail_attr_count = get_attribute_count(self.name)
-        print(self.name)
-        print(avail_attr_count)
         if avail_attr_count >= 20:
             total_count = TreeConfig.max_attribute_count
         elif avail_attr_count >= 10:

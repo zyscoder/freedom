@@ -102,8 +102,7 @@ class DOMTree:
             ###################################################
             # zys: generate a deeper dom tree
             ###################################################
-            while parent.children_count > 0:
-                if Random.range(0, TreeConfig.max_depth) == 0: break
+            while parent.children_count >= TreeConfig.max_width:
                 parents = parent.children
                 parent = Random.choice(parents)
             ###################################################
