@@ -84,7 +84,8 @@ class Function(Object):
         if self.full:
             return False
         self.context.line = len(self.apis)
-        api = self.generate_api()
+        api = self.generate_rdfuzz_api()
+        # api = self.generate_api()
         self.apis.append(api)
         return True
 
