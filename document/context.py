@@ -76,6 +76,7 @@ class DOMContext(Context):
     def rdfuzz_subbox(self):
         if len(self.rdfuzz_subtree) == 0:
             def get_descendants(element):
+                if not element or not element.children: return []
                 descendants = []
                 children = element.children
                 descendants.extend(descendants)
@@ -122,7 +123,7 @@ class DOMContext(Context):
     def get_objects(self, names):
         ret = self.get_rdfuzz_objects(names)
         if len(ret) > 0: return ret
-        
+
         for name in names:
             objs = self.object_pool.get(name)
             if objs is not None:
@@ -134,7 +135,6 @@ class DOMContext(Context):
         for obj in self.rdfuzz_subbox:
             if obj.name in names:
                 ret.append(obj)
-        print(ret)
         return ret
 
 

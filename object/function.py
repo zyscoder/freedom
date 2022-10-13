@@ -59,6 +59,7 @@ class Function(Object):
         # 2. select an api that uses the object name as |this|
         while True:
             obj = Random.choice(objs)
+            if obj.name not in js_apis.keys(): continue
             template = Random.choice(js_apis[obj.name])
             if template.satiable(self.context):
                 api = template.instantiate()
